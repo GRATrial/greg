@@ -140,7 +140,7 @@ export const FacebookProfileView: React.FC<FacebookProfileProps> = ({ resultId, 
           ))}
           {!isMobile && (
             <div style={{ position: 'relative' }}>
-              <img src={getFakeImageUrl(resultId, 'avatar')} style={{ width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', filter: 'blur(4px)' }} alt="" />
+              <img src={getFakeImageUrl(resultId, 'avatar')} style={{ width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', filter: 'blur(12px) saturate(1.5)' }} alt="" />
               <div style={{ position: 'absolute', bottom: 0, right: 0, width: '12px', height: '12px', backgroundColor: '#31a24c', borderRadius: '50%', border: '2px solid white' }} />
             </div>
           )}
@@ -162,7 +162,7 @@ export const FacebookProfileView: React.FC<FacebookProfileProps> = ({ resultId, 
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}>
           <div style={{ maxWidth: '1100px', margin: '0 auto', width: '100%', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src={getFakeImageUrl(resultId, 'avatar')} style={{ width: '40px', height: '40px', borderRadius: '50%', filter: 'blur(4px)' }} alt="" />
+            <img src={getFakeImageUrl(resultId, 'avatar')} style={{ width: '40px', height: '40px', borderRadius: '50%', filter: 'blur(12px) saturate(1.5)' }} alt="" />
             <span style={{ fontWeight: 600, fontSize: '17px' }}>{profile.name}</span>
           </div>
         </div>
@@ -178,7 +178,7 @@ export const FacebookProfileView: React.FC<FacebookProfileProps> = ({ resultId, 
           {/* Profile Identity Area */}
           <div style={{ padding: isMobile ? '0 12px 16px' : '0 32px 32px', marginTop: isMobile ? '-24px' : '-32px', display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'center' : 'flex-end', gap: '16px' }}>
             <div style={{ position: 'relative' }}>
-              <img src={getFakeImageUrl(resultId, 'avatar')} style={{ width: isMobile ? '100px' : '168px', height: isMobile ? '100px' : '168px', borderRadius: '50%', border: '4px solid white', backgroundColor: 'white', filter: 'blur(8px)' }} alt="" />
+              <img src={getFakeImageUrl(resultId, 'avatar')} style={{ width: isMobile ? '100px' : '168px', height: isMobile ? '100px' : '168px', borderRadius: '50%', border: '4px solid white', backgroundColor: 'white', filter: 'blur(30px) saturate(1.5)' }} alt="" />
             </div>
             <div style={{ flex: 1, paddingBottom: isMobile ? '0' : '16px', textAlign: isMobile ? 'center' : 'left' }}>
               <h1 style={{ fontSize: isMobile ? '24px' : '32px', fontWeight: 700, margin: 0 }}>{profile.name}</h1>
@@ -251,7 +251,7 @@ export const FacebookProfileView: React.FC<FacebookProfileProps> = ({ resultId, 
               <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.1)', marginBottom: '16px' }}>
                 <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', gap: '12px' }}>
-                    <img src={getFakeImageUrl(resultId, 'avatar')} style={{ width: '40px', height: '40px', borderRadius: '50%', filter: 'blur(4px)' }} alt="" />
+                    <img src={getFakeImageUrl(resultId, 'avatar')} style={{ width: '40px', height: '40px', borderRadius: '50%', filter: 'blur(12px) saturate(1.5)' }} alt="" />
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <span style={{ fontWeight: 600 }}>{profile.name}</span>
@@ -278,7 +278,7 @@ export const FacebookProfileView: React.FC<FacebookProfileProps> = ({ resultId, 
                         width: '100%',
                         height: '100%',
                         objectFit: 'cover',
-                        filter: 'blur(8px)'
+                        filter: 'blur(30px) saturate(1.5)'
                       }} 
                       alt="" 
                     />

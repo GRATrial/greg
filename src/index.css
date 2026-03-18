@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+  color: #202124;
+  font-size: 14px;
+}
+
+/* Google search result styling - matching exact Google classes */
+.g {
+  padding: 0 0 20px 0;
+}
+
+.g h3 {
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+}
+
+.g a {
+  color: #1a0dab;
+  text-decoration: none;
+}
+
+.g a:hover {
+  text-decoration: underline;
+}
+
+.g a:visited {
+  color: #609;
+}
+
+.g cite {
+  font-size: 14px;
+  color: #006621;
+  font-style: normal;
+  line-height: 1.3;
+}
+
+.g .st {
+  color: #4d5156;
+  line-height: 1.58;
+  font-size: 14px;
+}
+
+/* Google search bar styling */
+.gLFyf {
+  border: none;
+  outline: none;
+  font-size: 16px;
+  flex: 1;
+  padding: 0;
+  height: 100%;
+}
+
+/* Google tab styling */
+.T47KXc {
+  border-bottom: 1px solid #ebebeb;
+  background-color: #fff;
+}
+
+/* Responsive styles for mobile */
+@media (max-width: 768px) {
+  .g {
+    padding: 0 0 16px 0;
+  }
+  
+  .g h3 {
+    font-size: 18px;
+  }
+}

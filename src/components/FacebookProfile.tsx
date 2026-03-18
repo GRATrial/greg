@@ -64,8 +64,34 @@ export const FacebookProfileView: React.FC<FacebookProfileProps> = ({ resultId, 
         overscrollBehavior: 'contain'
       }}
     >
+      {/* Google-style Back to Search Bar */}
+      <div
+        onClick={onClose}
+        style={{
+          backgroundColor: '#fff',
+          borderBottom: '1px solid #e0e0e0',
+          padding: '10px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          position: 'sticky',
+          top: 0,
+          zIndex: 101,
+          cursor: 'pointer',
+        }}
+      >
+        <span style={{ color: '#1a73e8', fontSize: '18px', display: 'flex', alignItems: 'center' }}>←</span>
+        <span
+          style={{ color: '#1a73e8', fontSize: '14px' }}
+          onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'underline'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'none'; }}
+        >
+          Back to Google Search Results
+        </span>
+      </div>
+
       {/* Top Navbar */}
-      <div style={{ backgroundColor: 'white', borderBottom: '1px solid #ddd', position: 'sticky', top: 0, zIndex: 100, height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '0 8px' : '0 16px' }}>
+      <div style={{ backgroundColor: 'white', borderBottom: '1px solid #ddd', position: 'sticky', top: 41, zIndex: 100, height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '0 8px' : '0 16px' }}>
         {/* Left side: Logo and Search */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: isMobile ? 'none' : 1 }}>
           <svg width="40" height="40" viewBox="0 0 40 40" fill="#1877f2" style={{ flexShrink: 0 }}><circle cx="20" cy="20" r="20"/><path d="M27.5 20.5h-4.5v14h-5v-14h-3v-4.5h3v-3c0-2.5 1-4.5 4.5-4.5h4.5v4.5h-3v3h3v4.5z" fill="white"/></svg>
@@ -127,7 +153,7 @@ export const FacebookProfileView: React.FC<FacebookProfileProps> = ({ resultId, 
           backgroundColor: 'white', 
           borderBottom: '1px solid #ddd', 
           position: 'sticky', 
-          top: '56px', 
+          top: '97px',
           zIndex: 99, 
           height: '60px', 
           display: 'flex', 
@@ -147,24 +173,6 @@ export const FacebookProfileView: React.FC<FacebookProfileProps> = ({ resultId, 
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           {/* Cover Photo Area */}
           <div style={{ height: isMobile ? '200px' : '400px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '0 0 8px 8px', position: 'relative' }}>
-            {isMobile && (
-              <img
-                src="/back-to-search.png"
-                alt="Back to search"
-                onClick={onClose}
-                style={{
-                  position: 'absolute',
-                  top: '10px',
-                  right: '10px',
-                  height: '100px',
-                  cursor: 'pointer',
-                  transition: 'opacity 0.2s ease',
-                  zIndex: 10
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.7'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
-              />
-            )}
           </div>
 
           {/* Profile Identity Area */}
@@ -189,22 +197,6 @@ export const FacebookProfileView: React.FC<FacebookProfileProps> = ({ resultId, 
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
               </button>
             </div>
-            {!isMobile && (
-              <img
-                src="/back-to-search.png"
-                alt="Back to search"
-                onClick={onClose}
-                style={{
-                  height: '200px',
-                  cursor: 'pointer',
-                  transition: 'opacity 0.2s ease',
-                  flexShrink: 0,
-                  alignSelf: 'flex-start'
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.7'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
-              />
-            )}
           </div>
 
           {/* Profile Tabs */}

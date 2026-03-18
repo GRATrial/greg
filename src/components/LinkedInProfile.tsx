@@ -153,8 +153,34 @@ export const LinkedInProfileView: React.FC<LinkedInProfileProps> = ({ resultId, 
         overscrollBehavior: 'contain'
       }}
     >
+      {/* Google-style Back to Search Bar */}
+      <div
+        onClick={onClose}
+        style={{
+          backgroundColor: '#fff',
+          borderBottom: '1px solid #e0e0e0',
+          padding: '10px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          position: 'sticky',
+          top: 0,
+          zIndex: 101,
+          cursor: 'pointer',
+        }}
+      >
+        <span style={{ color: '#1a73e8', fontSize: '18px', display: 'flex', alignItems: 'center' }}>←</span>
+        <span
+          style={{ color: '#1a73e8', fontSize: '14px' }}
+          onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'underline'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'none'; }}
+        >
+          Back to Google Search Results
+        </span>
+      </div>
+
       {/* Navigation Bar */}
-      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e0e0e0', position: 'sticky', top: 0, zIndex: 100 }}>
+      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e0e0e0', position: 'sticky', top: 41, zIndex: 100 }}>
         <div style={{ maxWidth: '1128px', margin: '0 auto', height: '52px', display: 'flex', alignItems: 'center', padding: isMobile ? '0 8px' : '0 24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
             <svg width="34" height="34" viewBox="0 0 34 34" fill="none" style={{ borderRadius: '4px', flexShrink: 0 }}>
@@ -194,7 +220,7 @@ export const LinkedInProfileView: React.FC<LinkedInProfileProps> = ({ resultId, 
           backgroundColor: '#ffffff', 
           borderBottom: '1px solid #e0e0e0', 
           position: 'sticky', 
-          top: '52px', 
+          top: '93px',
           zIndex: 99, 
           height: '52px', 
           display: 'flex', 
@@ -225,24 +251,6 @@ export const LinkedInProfileView: React.FC<LinkedInProfileProps> = ({ resultId, 
           {/* Header Card */}
           <div style={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e0e0e0', overflow: 'hidden', marginBottom: '12px' }}>
             <div style={{ height: isMobile ? '120px' : '200px', backgroundColor: '#d0d7de', position: 'relative' }}>
-              {isMobile && (
-                <img
-                  src="/back-to-search.png"
-                  alt="Back to search"
-                  onClick={onClose}
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    height: '100px',
-                    cursor: 'pointer',
-                    transition: 'opacity 0.2s ease',
-                    zIndex: 10
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.7'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
-                />
-              )}
             </div>
             <div style={{ padding: isMobile ? '0 12px 16px' : '0 24px 24px', position: 'relative' }}>
               <div style={{ marginTop: isMobile ? '-60px' : '-112px', marginBottom: '16px' }}>
@@ -309,22 +317,6 @@ export const LinkedInProfileView: React.FC<LinkedInProfileProps> = ({ resultId, 
                       <span style={{ fontSize: '14px', fontWeight: 600, lineHeight: 1.2 }}>George Mason University</span>
                     </div>
                   </div>
-                )}
-                {!isMobile && (
-                  <img
-                    src="/back-to-search.png"
-                    alt="Back to search"
-                    onClick={onClose}
-                    style={{
-                      height: '200px',
-                      cursor: 'pointer',
-                      transition: 'opacity 0.2s ease',
-                      flexShrink: 0,
-                      alignSelf: 'flex-start'
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.7'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
-                  />
                 )}
               </div>
               <div style={{ display: 'flex', gap: '8px', marginTop: '24px', flexWrap: 'wrap' }}>

@@ -158,18 +158,26 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [currentPage, activeTab, footprintCondition]);
 
-  // Track tab changes
+  // Track tab changes (skip first render to avoid spurious event on mount)
+  const isFirstTabRender = useRef(true);
   useEffect(() => {
+    if (isFirstTabRender.current) {
+      isFirstTabRender.current = false;
+      return;
+    }
     if (activeTab) {
       trackTabChange(activeTab, 'greg', footprintCondition, prolificParams);
     }
   }, [activeTab, footprintCondition]);
 
-  // Track pagination
+  // Track pagination (skip first render to avoid spurious event on mount)
+  const isFirstPagRender = useRef(true);
   useEffect(() => {
-    if (currentPage > 1) {
-      trackPagination(currentPage, 'greg', footprintCondition, prolificParams);
+    if (isFirstPagRender.current) {
+      isFirstPagRender.current = false;
+      return;
     }
+    trackPagination(currentPage, 'greg', footprintCondition, prolificParams);
   }, [currentPage, footprintCondition]);
 
   // Get results for Greg (filter out LinkedIn/Facebook in footprint absent condition)
@@ -365,7 +373,6 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
                   <button
                     onClick={() => {
                       setCurrentPage(currentPage - 1);
-                      trackPagination(currentPage - 1, 'greg', footprintCondition, prolificParams);
                     }}
                     style={{
                       padding: '8px 16px',
@@ -393,7 +400,6 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
                       key={pageNum}
                       onClick={() => {
                         setCurrentPage(pageNum);
-                        trackPagination(pageNum, 'greg', footprintCondition, prolificParams);
                       }}
                       style={{
                         minWidth: '40px',
@@ -417,7 +423,6 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
                   <button
                     onClick={() => {
                       setCurrentPage(currentPage + 1);
-                      trackPagination(currentPage + 1, 'greg', footprintCondition, prolificParams);
                     }}
                     style={{
                       padding: '8px 16px',

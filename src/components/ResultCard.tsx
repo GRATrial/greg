@@ -687,8 +687,8 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onOpen, isDark, 
             e.preventDefault();
             // Always track clicks for analytics
             trackResultClick(result.id, result.platform, result.displayName, persona);
-            // Only open modal for Facebook and LinkedIn
-            if (result.platform === 'LinkedIn' || result.platform === 'Facebook') {
+            // Open overlay for LinkedIn, Facebook, Instagram, and X (parent decides further gating)
+            if (result.platform === 'LinkedIn' || result.platform === 'Facebook' || result.platform === 'Instagram' || result.platform === 'X') {
               onOpen(result);
             }
           }}

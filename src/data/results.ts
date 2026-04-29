@@ -2315,7 +2315,7 @@ export const RESULTS_Greg_Krieger: SimResult[] = [
   },
   {
     id: "greg63",
-    platform: "Twitter",
+    platform: "X",
     displayName: "Greg Krieger (@GregKriegerFL)",
     snippet: "890 followers · Sports enthusiast and lifelong runner. Updates on marathons, trail races, and fitness. Follows running communities and outdoor brands.",
     urlLike: "Twitter › GregKriegerFL",

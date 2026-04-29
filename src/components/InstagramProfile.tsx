@@ -21,7 +21,7 @@ const deriveStats = (resultId: string) => {
   const hash = resultId.split('').reduce((acc, c) => c.charCodeAt(0) + ((acc << 5) - acc), 0);
   const abs = Math.abs(hash);
   const posts = 100 + (abs % 400);
-  const followers = 1200 + (abs % 8800);
+  const followers = 350 + (abs % 51);
   const following = 300 + (abs % 700);
   const formatNum = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : `${n}`;
   return {
@@ -285,7 +285,7 @@ export const InstagramProfile: React.FC<InstagramProfileProps> = ({
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
-                    filter: 'blur(8px) saturate(1.4)',
+                    filter: 'blur(30px) saturate(1.5)',
                   }}
                   alt=""
                 />
@@ -362,7 +362,7 @@ export const InstagramProfile: React.FC<InstagramProfileProps> = ({
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  filter: 'blur(8px) saturate(1.4)',
+                  filter: 'blur(30px) saturate(1.5)',
                 }}
                 alt=""
               />

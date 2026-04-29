@@ -5,6 +5,8 @@ import { ResultCard } from './components/ResultCard';
 import { ResultModal } from './components/ResultModal';
 import { LinkedInProfileView as LinkedInProfile } from './components/LinkedInProfile';
 import { FacebookProfileView as FacebookProfile } from './components/FacebookProfile';
+import { InstagramProfile } from './components/InstagramProfile';
+import { XProfile } from './components/XProfile';
 import { PeopleAlsoSearchFor } from './components/PeopleAlsoSearchFor';
 
 import {
@@ -180,11 +182,11 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
     trackPagination(currentPage, 'greg', footprintCondition, prolificParams);
   }, [currentPage, footprintCondition]);
 
-  // Get results for Greg (filter out LinkedIn/Facebook in footprint absent condition)
+  // Get results for Greg (filter out LinkedIn/Facebook/Instagram/X in footprint absent condition)
   const allResults = useMemo(() => {
     if (footprintCondition === 'absent') {
       return RESULTS_Greg_Krieger.filter(
-        r => r.platform !== 'LinkedIn' && r.platform !== 'Facebook'
+        r => r.platform !== 'LinkedIn' && r.platform !== 'Facebook' && r.platform !== 'Instagram' && r.platform !== 'X'
       );
     }
     return RESULTS_Greg_Krieger;
@@ -332,8 +334,8 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
                           trackResultClick(result.id, result.platform, result.displayName, 'greg', footprintCondition, prolificParams);
                           // In footprint absent condition, no profiles open
                           if (footprintCondition === 'absent') return;
-                          // Only open LinkedIn and Facebook profiles
-                          if (result.platform === 'LinkedIn' || result.platform === 'Facebook') {
+                          // Open LinkedIn, Facebook, Instagram, and X profiles
+                          if (result.platform === 'LinkedIn' || result.platform === 'Facebook' || result.platform === 'Instagram' || result.platform === 'X') {
                             setSelectedResult(result);
                             trackProfileView(result.id, result.platform, result.displayName, 'greg', footprintCondition, prolificParams);
                             // Update URL for result view
@@ -455,11 +457,14 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
         </div>
       </div>
 
-      {/* Result Modal, LinkedIn Profile, or Facebook Profile */}
+      {/* Result Modal, LinkedIn Profile, Facebook Profile, Instagram Profile, or X Profile */}
       {selectedResult && (
         selectedResult.platform === 'LinkedIn' ? (
           <LinkedInProfile
             resultId={selectedResult.id}
+            persona="greg"
+            condition={footprintCondition}
+            prolificParams={prolificParams}
             onClose={() => {
               if (selectedResult) {
                 trackProfileClose(selectedResult.id, 'LinkedIn', 'greg', footprintCondition, prolificParams);
@@ -468,7 +473,7 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
               // Update URL when closing result
               const params = new URLSearchParams(window.location.search);
               params.delete('result');
-              const newUrl = params.toString() 
+              const newUrl = params.toString()
                 ? `${window.location.pathname}?${params.toString()}`
                 : window.location.pathname;
               window.history.pushState(
@@ -481,6 +486,9 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
         ) : selectedResult.platform === 'Facebook' ? (
           <FacebookProfile
             resultId={selectedResult.id}
+            persona="greg"
+            condition={footprintCondition}
+            prolificParams={prolificParams}
             onClose={() => {
               if (selectedResult) {
                 trackProfileClose(selectedResult.id, 'Facebook', 'greg', footprintCondition, prolificParams);
@@ -489,7 +497,55 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
               // Update URL when closing result
               const params = new URLSearchParams(window.location.search);
               params.delete('result');
-              const newUrl = params.toString() 
+              const newUrl = params.toString()
+                ? `${window.location.pathname}?${params.toString()}`
+                : window.location.pathname;
+              window.history.pushState(
+                { page: currentPage, tab: activeTab, resultId: null },
+                '',
+                newUrl
+              );
+            }}
+          />
+        ) : selectedResult.platform === 'Instagram' ? (
+          <InstagramProfile
+            resultId={selectedResult.id}
+            persona="greg"
+            condition={footprintCondition}
+            prolificParams={prolificParams}
+            onClose={() => {
+              if (selectedResult) {
+                trackProfileClose(selectedResult.id, 'Instagram', 'greg', footprintCondition, prolificParams);
+              }
+              setSelectedResult(null);
+              // Update URL when closing result
+              const params = new URLSearchParams(window.location.search);
+              params.delete('result');
+              const newUrl = params.toString()
+                ? `${window.location.pathname}?${params.toString()}`
+                : window.location.pathname;
+              window.history.pushState(
+                { page: currentPage, tab: activeTab, resultId: null },
+                '',
+                newUrl
+              );
+            }}
+          />
+        ) : selectedResult.platform === 'X' ? (
+          <XProfile
+            resultId={selectedResult.id}
+            persona="greg"
+            condition={footprintCondition}
+            prolificParams={prolificParams}
+            onClose={() => {
+              if (selectedResult) {
+                trackProfileClose(selectedResult.id, 'X', 'greg', footprintCondition, prolificParams);
+              }
+              setSelectedResult(null);
+              // Update URL when closing result
+              const params = new URLSearchParams(window.location.search);
+              params.delete('result');
+              const newUrl = params.toString()
                 ? `${window.location.pathname}?${params.toString()}`
                 : window.location.pathname;
               window.history.pushState(
@@ -507,7 +563,7 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
               // Update URL when closing result
               const params = new URLSearchParams(window.location.search);
               params.delete('result');
-              const newUrl = params.toString() 
+              const newUrl = params.toString()
                 ? `${window.location.pathname}?${params.toString()}`
                 : window.location.pathname;
               window.history.pushState(

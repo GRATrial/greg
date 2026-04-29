@@ -1,10 +1,15 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { LinkedInProfileData, generateLinkedInProfile, getCompanyLogoUrl } from '../utils/linkedInData';
 import { getFakeImageUrl } from '../utils/fakeImages';
+import { trackEvent } from '../utils/tracking';
+import type { ProlificParams } from '../utils/tracking';
 
 interface LinkedInProfileProps {
   resultId: string;
   onClose: () => void;
+  persona?: string;
+  condition?: string;
+  prolificParams?: ProlificParams;
 }
 
 const GMU_LOGO_BASE64 = "data:image/webp;base64,UklGRsYAAABXRUJQVlA4ILoAAAAwAwCdASoQABAAAsBMJbACdEf/2QkSmjxZxdUZDl/uEZMwAP74QFVX4aan10wAL8LMAoUfXwYg9C3UgbsHOjZhASY3kkc5sSH9Uv4T7M6GP1LFCIlOzHrwW3/co2Y/kpExLUXxx+IfPEDq7l5edW4zIAWRA+w973mo8vajKyPIgGQu12Aq3xPKtDmJQfomDZMKEVcWcKMP1tySPY6dwVsQYT/0Xod6ynOc3DqDXs+5a3P9blrys+QAAAA=";
@@ -97,7 +102,7 @@ const CompanyLogo: React.FC<{ company: string; size?: number }> = ({ company, si
   );
 };
 
-export const LinkedInProfileView: React.FC<LinkedInProfileProps> = ({ resultId, onClose }) => {
+export const LinkedInProfileView: React.FC<LinkedInProfileProps> = ({ resultId, onClose, persona = 'greg', condition, prolificParams }) => {
   const [showStickyHeader, setShowStickyHeader] = React.useState(false);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -558,11 +563,21 @@ export const LinkedInProfileView: React.FC<LinkedInProfileProps> = ({ resultId, 
             <h2 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '20px' }}>Interests</h2>
             <div style={{ display: 'flex', gap: '24px', borderBottom: '1px solid #e0e0e0', marginBottom: '16px' }}>
               {['Companies', 'Groups', 'Newsletters', 'Schools'].map((tab, i) => (
-                <div key={tab} style={{ 
-                  padding: '8px 0', 
-                  fontSize: '14px', 
-                  fontWeight: 600, 
-                  color: i === 0 ? '#01754f' : '#666', 
+                <div key={tab} onClick={() => {
+                  trackEvent({
+                    eventType: 'tab_change',
+                    elementType: 'overlay_internal_tab',
+                    platform: 'LinkedIn',
+                    elementText: tab,
+                    persona,
+                    condition,
+                    ...prolificParams,
+                  });
+                }} style={{
+                  padding: '8px 0',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: i === 0 ? '#01754f' : '#666',
                   borderBottom: i === 0 ? '2px solid #01754f' : 'none',
                   cursor: 'pointer'
                 }}>{tab}</div>

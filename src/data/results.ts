@@ -16,6 +16,7 @@ export type SimResult = {
   currentCompany?: string;       // For LinkedIn: current company
   followers?: string;            // For LinkedIn/Instagram: follower count
   sideImageUrl?: string;         // For right-side thumbnail
+  isTarget?: boolean;            // true = the canonical target persona's profile (overlay opens on click)
 };
 
 // Seed names - ### PLACEHOLDER: RESEARCHER WILL PASTE FINAL NAMES
@@ -1654,6 +1655,7 @@ export const RESULTS_Greg_Krieger: SimResult[] = [
   },
   {
     id: "greg5",
+    isTarget: true,
     platform: "LinkedIn",
     displayName: "Gregory Krieger - Midwest Capital Advisors",
     snippet: "350+ followers · Chicago, Illinois, United States · Midwest Capital Advisors · Experience: Midwest Capital Advisors · Education: University of Michigan · Location: Chicago · 450+ connections on LinkedIn. View Gregory Krieger's profile on LinkedIn, ...",
@@ -1667,6 +1669,7 @@ export const RESULTS_Greg_Krieger: SimResult[] = [
   },
   {
     id: "greg6",
+    isTarget: true,
     platform: "Facebook",
     displayName: "Greg Krieger in people",
     snippet: "People named Greg Krieger ; Greg Krieger. Owner at Deer Rock Knives LLC · Lives in ; Greg Krieger. Lives in Greensburg, Indiana ; Gregory Krieger. Business ...Read more",
@@ -1691,10 +1694,11 @@ export const RESULTS_Greg_Krieger: SimResult[] = [
   },
   {
     id: "greg3",
+    isTarget: true,
     platform: "Instagram",
-    displayName: "Greg Krieger (@deerrockknives)",
-    snippet: "350+ followers · 206 following · 358 posts · @deerrockknives: Guide/former conservation specialist Ultra runner Knife maker Greensburg, IN ...Read more",
-    urlLike: "Instagram · deerrockknives",
+    displayName: "Greg Krieger (@gregkrieger) • Instagram",
+    snippet: "350+ followers · 142 following · 185 posts · @gregkrieger: Chicago | Finance | UMich Alum | Midwest Capital Advisors",
+    urlLike: "Instagram · gregkrieger",
     discoverability: "High",
     footprint: "Present",
     race: "White American",
@@ -2315,10 +2319,11 @@ export const RESULTS_Greg_Krieger: SimResult[] = [
   },
   {
     id: "greg63",
+    isTarget: true,
     platform: "X",
-    displayName: "Greg Krieger (@GregKriegerFL)",
-    snippet: "890 followers · Sports enthusiast and lifelong runner. Updates on marathons, trail races, and fitness. Follows running communities and outdoor brands.",
-    urlLike: "Twitter › GregKriegerFL",
+    displayName: "Greg Krieger (@GregKriegerCHI)",
+    snippet: "890 followers · Investment professional | Chicago-based | Finance & Markets | Thoughts on portfolio strategy and emerging opportunities.",
+    urlLike: "x.com › GregKriegerCHI",
     discoverability: "High",
     footprint: "Present",
     race: "White American",

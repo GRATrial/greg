@@ -182,14 +182,17 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
     trackPagination(currentPage, 'greg', footprintCondition, prolificParams);
   }, [currentPage, footprintCondition]);
 
-  // Get results for Greg (filter out LinkedIn/Facebook/Instagram/X in footprint absent condition)
+  // Get results for Greg (filter out LinkedIn/Facebook/Instagram/X in footprint absent condition;
+  // also pin canonical target profiles to the top of the SERP via stable sort on isTarget)
   const allResults = useMemo(() => {
-    if (footprintCondition === 'absent') {
-      return RESULTS_Greg_Krieger.filter(
-        r => r.platform !== 'LinkedIn' && r.platform !== 'Facebook' && r.platform !== 'Instagram' && r.platform !== 'X'
-      );
-    }
-    return RESULTS_Greg_Krieger;
+    const base = footprintCondition === 'absent'
+      ? RESULTS_Greg_Krieger.filter(r => r.platform !== 'LinkedIn' && r.platform !== 'Facebook' && r.platform !== 'Instagram' && r.platform !== 'X')
+      : RESULTS_Greg_Krieger;
+    return [...base].sort((a, b) => {
+      if (a.isTarget && !b.isTarget) return -1;
+      if (!a.isTarget && b.isTarget) return 1;
+      return 0;
+    });
   }, [footprintCondition]);
 
   // Filter results by active tab
@@ -334,8 +337,9 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
                           trackResultClick(result.id, result.platform, result.displayName, 'greg', footprintCondition, prolificParams);
                           // In footprint absent condition, no profiles open
                           if (footprintCondition === 'absent') return;
-                          // Open LinkedIn, Facebook, Instagram, and X profiles
-                          if (result.platform === 'LinkedIn' || result.platform === 'Facebook' || result.platform === 'Instagram' || result.platform === 'X') {
+                          // Open overlays only for the canonical TARGET profile of each platform
+                          // (namesake/aggregation results stay clickable but silent — trackResultClick already fired above)
+                          if (result.isTarget && (result.platform === 'LinkedIn' || result.platform === 'Facebook' || result.platform === 'Instagram' || result.platform === 'X')) {
                             setSelectedResult(result);
                             trackProfileView(result.id, result.platform, result.displayName, 'greg', footprintCondition, prolificParams);
                             // Update URL for result view

@@ -2,8 +2,10 @@
 //
 // 2026-09-13 hardening:
 //  - every event carries seq (per-session counter) and sessionMs (ms since session start)
-//  - fetch uses keepalive so events fired right before navigation survive
-//  - failed sends are queued and retried once; the queue is flushed via sendBeacon on unload
+//  - delivery goes through an outbox: fetch(keepalive) → ack; unacked events are re-sent every few
+//    seconds and beaconed on pagehide/hidden/beforeunload. The server de-duplicates on
+//    (sessionId, seq) via a unique index, so re-sends never double count.
+//  - events fired right before navigation (Done Searching, session_end) go straight to sendBeacon
 //  - new event types: 'scroll' (depth milestones) and 'visibility' (tab hidden/visible)
 
 export interface TrackingEvent {
@@ -29,11 +31,16 @@ export interface TrackingEvent {
   sessionIdProlific?: string; // Prolific session ID
 }
 
+type EventInput = Omit<TrackingEvent, 'timestamp' | 'sessionId' | 'seq' | 'sessionMs'>;
+
 const SESSION_KEY = 'google_sim_session_id';
 const SESSION_START_KEY = 'google_sim_session_start';
 const SEQ_KEY = 'google_sim_seq';
 const API_URL = '/api/track';
 const IS_DEV: boolean = Boolean((import.meta as any).env?.DEV);
+const RESEND_INTERVAL_MS = 4000; // how often the outbox is scanned
+const RESEND_AFTER_MS = 3000; // an event unacked for this long is sent again
+const MAX_ATTEMPTS = 6;
 
 const safeGet = (k: string): string | null => {
   try { return sessionStorage.getItem(k); } catch { return null; }
@@ -66,7 +73,7 @@ const sessionMs = (): number => {
 };
 
 // Stamp an event with timestamp / session / ordering metadata
-const stamp = (event: Omit<TrackingEvent, 'timestamp' | 'sessionId' | 'seq' | 'sessionMs'>): TrackingEvent => ({
+const stamp = (event: EventInput): TrackingEvent => ({
   ...event,
   timestamp: new Date().toISOString(),
   sessionId: getSessionId(),
@@ -74,10 +81,11 @@ const stamp = (event: Omit<TrackingEvent, 'timestamp' | 'sessionId' | 'seq' | 's
   sessionMs: sessionMs(),
 });
 
-// ---- delivery: keepalive fetch, one retry, beacon flush on unload ----
-const pending: TrackingEvent[] = [];
+// ---------------------------------------------------------------- delivery
+interface OutboxEntry { event: TrackingEvent; attempts: number; lastSent: number; inFlight: boolean }
+const outbox = new Map<number, OutboxEntry>(); // keyed by seq
 
-const sendBeacon = (event: TrackingEvent): boolean => {
+const beacon = (event: TrackingEvent): boolean => {
   try {
     if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
       const blob = new Blob([JSON.stringify(event)], { type: 'application/json' });
@@ -87,56 +95,83 @@ const sendBeacon = (event: TrackingEvent): boolean => {
   return false;
 };
 
-/** Flush any undelivered events via sendBeacon (safe to call during unload). */
-export const flushTrackingQueue = (): void => {
-  while (pending.length) {
-    const ev = pending.shift()!;
-    sendBeacon(ev);
-  }
-};
-
-const deliver = async (trackingEvent: TrackingEvent, attempt: number): Promise<void> => {
+const sendOnce = async (entry: OutboxEntry): Promise<void> => {
+  entry.attempts += 1;
+  entry.lastSent = Date.now();
+  entry.inFlight = true;
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(trackingEvent),
+      body: JSON.stringify(entry.event),
       keepalive: true, // survive navigation triggered right after the event
     });
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status} ${response.statusText}`);
+    if (response.ok) {
+      outbox.delete(entry.event.seq as number); // acknowledged
+      if (IS_DEV) console.log('✅ Event tracked:', entry.event.eventType, entry.event.seq);
+    } else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+      // rejected by the API (malformed) — retrying will not help
+      outbox.delete(entry.event.seq as number);
+      console.error('❌ Tracking event rejected:', response.status, entry.event);
     }
-    if (IS_DEV) console.log('✅ Event tracked:', trackingEvent.eventType, trackingEvent.seq);
-  } catch (error: any) {
-    if (attempt < 1) {
-      // one retry after a short delay; keep it in the queue meanwhile so an unload can beacon it
-      pending.push(trackingEvent);
-      setTimeout(() => {
-        const idx = pending.indexOf(trackingEvent);
-        if (idx !== -1) {
-          pending.splice(idx, 1);
-          void deliver(trackingEvent, attempt + 1);
-        }
-      }, 2000);
-    } else {
-      // last resort
-      if (!sendBeacon(trackingEvent)) {
-        console.error('❌ Tracking event lost:', {
-          error: error?.message,
-          event: trackingEvent,
-          note: IS_DEV
-            ? 'API endpoint only works when deployed to Vercel. Use "vercel dev" to test locally.'
-            : 'Check Vercel function logs for details',
-        });
-      }
-    }
+    // 5xx / 429: leave in the outbox, the resend loop will try again
+  } catch {
+    // network failure: leave in the outbox
+  } finally {
+    entry.inFlight = false;
   }
 };
 
-// Track an event
-export const trackEvent = async (event: Omit<TrackingEvent, 'timestamp' | 'sessionId' | 'seq' | 'sessionMs'>): Promise<void> => {
+/** Re-send any event that has not been acknowledged (called periodically). */
+const resendStale = (): void => {
+  const now = Date.now();
+  outbox.forEach((entry) => {
+    if (entry.inFlight && now - entry.lastSent < 15000) return; // still waiting for a reply
+    if (now - entry.lastSent < RESEND_AFTER_MS) return;
+    if (entry.attempts >= MAX_ATTEMPTS) {
+      // last resort, then stop tracking it
+      beacon(entry.event);
+      outbox.delete(entry.event.seq as number);
+      return;
+    }
+    void sendOnce(entry);
+  });
+};
+
+/** Beacon every unacknowledged event (safe during unload). Duplicates are dropped server-side. */
+export const flushTrackingQueue = (): void => {
+  outbox.forEach((entry) => {
+    if (beacon(entry.event)) outbox.delete(entry.event.seq as number);
+  });
+};
+
+// Module-level lifecycle hooks (registered once per page load)
+if (typeof window !== 'undefined') {
+  window.setInterval(resendStale, RESEND_INTERVAL_MS);
+  window.addEventListener('pagehide', flushTrackingQueue);
+  window.addEventListener('beforeunload', flushTrackingQueue);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushTrackingQueue();
+  });
+}
+
+// Track an event (normal path: fetch with keepalive, acknowledged, re-sent until confirmed)
+export const trackEvent = async (event: EventInput): Promise<void> => {
   const trackingEvent = stamp(event);
-  await deliver(trackingEvent, 0);
+  const entry: OutboxEntry = { event: trackingEvent, attempts: 0, lastSent: 0, inFlight: false };
+  outbox.set(trackingEvent.seq as number, entry);
+  await sendOnce(entry);
+};
+
+/** Track an event that is immediately followed by navigation (e.g. Done Searching). */
+export const trackEventBeacon = (event: EventInput): void => {
+  const trackingEvent = stamp(event);
+  if (!beacon(trackingEvent)) {
+    // sendBeacon unavailable — fall back to the normal path
+    const entry: OutboxEntry = { event: trackingEvent, attempts: 0, lastSent: 0, inFlight: false };
+    outbox.set(trackingEvent.seq as number, entry);
+    void sendOnce(entry);
+  }
 };
 
 // Helper functions for common tracking scenarios
@@ -258,7 +293,9 @@ export const trackScrollDepth = (depth: number, persona: string, page?: number, 
 
 /** Tab/window visibility change — lets dwell time exclude periods spent in another tab. */
 export const trackVisibility = (state: string, persona: string, page?: number, tab?: string, condition?: string, prolific?: ProlificParams) => {
-  trackEvent({
+  // 'hidden' may be the last thing before the tab dies, so beacon it
+  const send = state === 'hidden' ? trackEventBeacon : trackEvent;
+  send({
     eventType: 'visibility',
     elementType: 'visibility',
     visibility: state,
@@ -271,9 +308,9 @@ export const trackVisibility = (state: string, persona: string, page?: number, t
 };
 
 export const trackSessionEnd = (persona: string, page?: number, tab?: string, condition?: string, prolific?: ProlificParams) => {
-  // Deliver anything still queued, then send the end marker via sendBeacon (reliable during unload)
+  // Deliver anything still unacknowledged, then send the end marker via sendBeacon
   flushTrackingQueue();
-  const trackingEvent = stamp({
+  trackEventBeacon({
     eventType: 'session_end',
     elementType: 'session',
     persona,
@@ -282,8 +319,4 @@ export const trackSessionEnd = (persona: string, page?: number, tab?: string, co
     condition,
     ...prolific,
   });
-  if (!sendBeacon(trackingEvent)) {
-    // sendBeacon unavailable — best effort
-    void deliver(trackingEvent, 1);
-  }
 };

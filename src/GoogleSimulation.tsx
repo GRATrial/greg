@@ -14,7 +14,7 @@ import {
   type SimResult
 } from './data/results';
 import { getRelatedSearches } from './data/relatedSearches';
-import { trackPageView, trackTabChange, trackPagination, trackSearch, trackResultClick, trackEvent, trackEventBeacon, trackProfileView, trackProfileClose, trackSessionEnd, type ProlificParams } from './utils/tracking';
+import { trackPageView, trackTabChange, trackPagination, trackSearch, trackResultClick, trackEvent, setTrackingDefaults, trackEventBeacon, trackProfileView, trackProfileClose, trackSessionEnd, type ProlificParams } from './utils/tracking';
 import { useEngagementTracking } from './utils/engagement';
 
 interface GoogleSimulationProps {
@@ -40,6 +40,8 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
     studyId: initialParams.get('STUDY_ID') || undefined,
     sessionIdProlific: initialParams.get('SESSION_ID') || undefined,
   }), [initialParams]);
+  // Let component-level tracking calls inherit the participant's attribution
+  setTrackingDefaults({ condition: footprintCondition, ...prolificParams });
 
   // Force light mode as requested
   const isDark = false;
@@ -338,7 +340,7 @@ const GoogleSimulation: React.FC<GoogleSimulationProps> = ({ searchType = 'greg'
                       <ResultCard
                         result={result}
                         onOpen={(result) => {
-                          trackResultClick(result.id, result.platform, result.displayName, 'greg', footprintCondition, prolificParams);
+                          // (the click itself is tracked inside ResultCard for every result, target or namesake)
                           // In footprint absent condition, no profiles open
                           if (footprintCondition === 'absent') return;
                           // Open overlays only for the canonical TARGET profile of each platform

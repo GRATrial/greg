@@ -72,14 +72,38 @@ const sessionMs = (): number => {
   return Number.isFinite(start) ? Date.now() - start : 0;
 };
 
-// Stamp an event with timestamp / session / ordering metadata
+// ---------------------------------------------------------------- defaults
+// Prolific params + footprint condition are read from the initial URL at load time, and may be
+// overridden by the app via setTrackingDefaults(). stamp() fills them in for any event that does
+// not carry them, so events emitted from nested components (profile overlays, result cards, tabs)
+// are attributed to the participant too.
+export interface TrackingDefaults { condition?: string; prolificPid?: string; studyId?: string; sessionIdProlific?: string }
+const defaults: TrackingDefaults = {};
+try {
+  const q = new URLSearchParams(window.location.search);
+  defaults.prolificPid = q.get('PROLIFIC_PID') || undefined;
+  defaults.studyId = q.get('STUDY_ID') || undefined;
+  defaults.sessionIdProlific = q.get('SESSION_ID') || undefined;
+  defaults.condition = q.get('condition') || undefined;
+} catch { /* no window */ }
+
+/** Called once by the app with its resolved condition + Prolific params. */
+export const setTrackingDefaults = (d: TrackingDefaults): void => {
+  (Object.keys(d) as (keyof TrackingDefaults)[]).forEach((k) => { if (d[k]) defaults[k] = d[k]; });
+};
+
+// Stamp an event with timestamp / session / ordering metadata (+ defaults for missing attribution)
 const stamp = (event: EventInput): TrackingEvent => ({
-  ...event,
+  condition: defaults.condition,
+  prolificPid: defaults.prolificPid,
+  studyId: defaults.studyId,
+  sessionIdProlific: defaults.sessionIdProlific,
+  ...Object.fromEntries(Object.entries(event).filter(([, v]) => v !== undefined)),
   timestamp: new Date().toISOString(),
   sessionId: getSessionId(),
   seq: nextSeq(),
   sessionMs: sessionMs(),
-});
+} as TrackingEvent);
 
 // ---------------------------------------------------------------- delivery
 interface OutboxEntry { event: TrackingEvent; attempts: number; lastSent: number; inFlight: boolean }

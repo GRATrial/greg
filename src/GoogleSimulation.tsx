@@ -14,7 +14,7 @@ import {
   type SimResult
 } from './data/results';
 import { getRelatedSearches } from './data/relatedSearches';
-import { trackPageView, trackTabChange, trackPagination, trackSearch, trackResultClick, setTrackingDefaults, trackEventBeacon, trackProfileView, trackProfileClose, trackSessionEnd, type ProlificParams } from './utils/tracking';
+import { trackPageView, trackTabChange, trackPagination, trackSearch, setTrackingDefaults, trackEventBeacon, trackProfileView, trackProfileClose, trackSessionEnd, type ProlificParams } from './utils/tracking';
 import { useEngagementTracking } from './utils/engagement';
 
 interface GoogleSimulationProps {

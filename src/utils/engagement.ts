@@ -65,9 +65,23 @@ export function useEngagementTracking(
   }, [persona, page, tab, condition, prolific]);
 
   useEffect(() => {
+    // Debounced: a state must persist for 1 s before it is recorded, only real changes are
+    // recorded, and at most 40 visibility events per page load (rapid hidden/visible flicker
+    // from embedded browsers or window managers otherwise floods the log).
+    let lastRecorded = document.visibilityState;
+    let timer: number | null = null;
+    let count = 0;
     const onVisibility = () => {
-      trackVisibility(document.visibilityState, persona, page, tab, condition, prolific);
-      if (document.visibilityState === 'hidden') flushTrackingQueue();
+      if (document.visibilityState === 'hidden') flushTrackingQueue(); // always protect the queue
+      if (timer !== null) window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        timer = null;
+        const state = document.visibilityState;
+        if (state === lastRecorded || count >= 40) return;
+        lastRecorded = state;
+        count += 1;
+        trackVisibility(state, persona, page, tab, condition, prolific);
+      }, 1000);
     };
     const onPageHide = () => flushTrackingQueue();
     document.addEventListener('visibilitychange', onVisibility);
@@ -75,6 +89,7 @@ export function useEngagementTracking(
     return () => {
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('pagehide', onPageHide);
+      if (timer !== null) window.clearTimeout(timer);
     };
   }, [persona, page, tab, condition, prolific]);
 }
